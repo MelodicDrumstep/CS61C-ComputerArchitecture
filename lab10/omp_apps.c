@@ -7,42 +7,48 @@ double* gen_array(int n) {
   return array;
 }
 
-double dotp_naive(double* x, double* y, int arr_size) {
+double dotp_naive(double* x, double* y, int arr_size) 
+{
   double global_sum = 0.0;
-#pragma omp parallel
+  #pragma omp parallel
   {
-#pragma omp for
+    #pragma omp for
     for (int i = 0; i < arr_size; i++)
-#pragma omp critical
+    {
+      #pragma omp critical
       global_sum += x[i] * y[i];
+    }
   }
   return global_sum;
 }
 
 // EDIT THIS FUNCTION PART 1
-double dotp_manual_optimized(double* x, double* y, int arr_size) {
+double dotp_manual_optimized(double* x, double* y, int arr_size) 
+{
   double global_sum = 0.0;
-#pragma omp parallel
+  #pragma omp parallel
   {
-#pragma omp for
+    double temp = 0;
+    #pragma omp for
     for (int i = 0; i < arr_size; i++)
-#pragma omp critical
-      global_sum += x[i] * y[i];
+    {
+      temp += x[i] * y[i];
+    }
+    #pragma omp critical
+    global_sum += temp;
   }
   return global_sum;
 }
 
 // EDIT THIS FUNCTION PART 2
 double dotp_reduction_optimized(double* x, double* y, int arr_size) {
-  double global_sum = 0.0;
-#pragma omp parallel
-  {
-#pragma omp for
+    double global_sum = 0.0;
+    #pragma omp parallel for reduction(+:global_sum)
     for (int i = 0; i < arr_size; i++)
-#pragma omp critical
-      global_sum += x[i] * y[i];
-  }
-  return global_sum;
+    {
+        global_sum += x[i] * y[i];
+    }
+    return global_sum;
 }
 
 char* compute_dotp(int arr_size) {
